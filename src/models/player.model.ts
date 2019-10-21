@@ -1,6 +1,6 @@
 import * as PIXI from 'pixi.js';
-import { Observable, timer } from 'rxjs';
-import { filter, tap, switchMap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { filter, tap, debounceTime } from 'rxjs/operators';
 
 import { PHYSICS, CANVAS_SIZE, SPRITE_URLS } from '../constants/game_config.constants';
 
@@ -38,7 +38,7 @@ export class Player {
       .pipe(
         filter(({ keyCode }) => keyCode === 32 || keyCode === 38),
         tap(() => this.flap()),
-        switchMap(() => timer(250)),
+        debounceTime(250),
         tap(() => this.changeAnimation(SPRITE_URLS.PLAYER.INITIAL)),
       )
       .subscribe();
