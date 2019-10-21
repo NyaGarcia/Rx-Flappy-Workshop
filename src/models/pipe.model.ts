@@ -1,82 +1,65 @@
-import * as PIXI from "pixi.js";
-import { Observable, pipe } from "rxjs";
-import { map } from "rxjs/operators";
-import {
-  SPRITE_URLS,
-  PHYSICS,
-  CANVAS_SIZE,
-  PARAMS
-} from "../constants/game_config.constants";
+import * as PIXI from 'pixi.js';
+import { Observable } from 'rxjs';
+
+import { SPRITE_URLS, PHYSICS, CANVAS_SIZE, PARAMS } from '../constants/game_config.constants';
+
 export class Pipe {
-  public sprite: any;
-  private type: string;
-  private _updateSubscription: any;
+  public sprite: PIXI.Sprite;
+
+  private frameUpdateSubscription = this.frameUpdate$.subscribe(delta =>
+    this.updatePosition(delta),
+  );
+
+  private unsubscribe = () => this.frameUpdateSubscription.unsubscribe();
 
   constructor(
     public stage: PIXI.Container,
-    private update$: Observable<any>,
-    private parent?: PIXI.Sprite
+    private frameUpdate$: Observable<number>,
+    parent?: PIXI.Sprite,
   ) {
-    this._createGameObject(this.parent);
-    this._suscribeObservables();
+    this.createGameObject(parent);
   }
 
-  private _createGameObject(parent: PIXI.Sprite) {
+  private createGameObject(parent?: PIXI.Sprite) {
     this.sprite = PIXI.Sprite.from(SPRITE_URLS.PIPE);
 
-    //TODO improve this
-    const generationConfig = {
-      anchor: {
-        x: 0.5,
-        y: parent ? 0.5 : 0.5
-      },
-      pos: {
-        x: CANVAS_SIZE.WIDTH + this.sprite.width,
-        y: parent
-          ? parent.position.y - PARAMS.VERTICAL_PIPES_SEPARATION
-          : this._getRandomHeight()
-      },
-      scale: {
-        x: 7,
-        y: parent ? -7 : 7
-      }
+    // TODO: improve this
+    const anchor = {
+      x: 0.5,
+      // TODO: -0.5??
+      y: parent ? 0.5 : 0.5,
     };
 
-    this.sprite.anchor.set(
-      generationConfig.anchor.x,
-      generationConfig.anchor.y
-    );
-    this.sprite.position.set(generationConfig.pos.x, generationConfig.pos.y);
-    this.sprite.scale.set(generationConfig.scale.x, generationConfig.scale.y);
-    this.sprite.type = "pipe";
-    this.sprite.gameOver = this.gameOver;
+    const pos = {
+      x: CANVAS_SIZE.WIDTH + this.sprite.width,
+      y: parent ? parent.position.y - PARAMS.VERTICAL_PIPES_SEPARATION : this.getRandomHeight(),
+    };
+
+    const scale = {
+      x: 7,
+      y: parent ? -7 : 7,
+    };
+
+    this.sprite.anchor.set(anchor.x, anchor.y);
+    this.sprite.position.set(pos.x, pos.y);
+    this.sprite.scale.set(scale.x, scale.y);
+
+    this.sprite.type = 'pipe';
 
     this.stage.addChild(this.sprite);
 
+    this.sprite.once('removed', this.unsubscribe);
+
     if (!parent) {
-      new Pipe(this.stage, this.update$, this.sprite);
+      new Pipe(this.stage, this.frameUpdate$, this.sprite);
     }
   }
 
-  private _suscribeObservables() {
-    this._updateSubscription = this.update$.subscribe(delta => {
-      this._updatePosition(delta);
-    });
-  }
-
-  private _updatePosition(delta: number) {
+  private updatePosition(delta: number) {
     this.sprite.position.x -= PHYSICS.PIPE_SPEED * delta;
   }
 
-  private _getRandomHeight() {
+  private getRandomHeight() {
     return Math.floor(Math.random() * 500) + 500;
-  }
-
-  public gameOver = () => {
-    this._unsubscribe();
-  };
-
-  private _unsubscribe() {
-    this._updateSubscription.unsubscribe();
   }
 }
