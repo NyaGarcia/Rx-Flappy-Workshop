@@ -4,34 +4,35 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "gulp"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@lcluber/bumpjs": "^0.5.4",
-    "pixi-plugin-bump": "^1.1.8",
-    "pixi.js": "^5.0.0-rc.2",
+    "acorn": "^7.1.0",
+    "pixi.js": "^5.1.5",
     "rxjs": "^6.4.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^7.5.2",
     "@commitlint/config-angular": "^7.5.0",
     "@types/node": "^11.9.5",
-    "@types/pixi.js": "^4.8.6",
+    "@types/pixi.js": "^4.8.9",
     "browserify": "^16.2.3",
     "commitlint": "^7.5.2",
     "gulp": "^4.0.0",
     "gulp-autoprefixer": "^6.0.0",
     "gulp-concat": "^2.6.1",
+    "gulp-connect": "^5.7.0",
     "gulp-minify-css": "^1.2.4",
     "gulp-rename": "^1.4.0",
     "gulp-sourcemaps": "^2.6.5",
     "gulp-useref": "^3.1.6",
     "husky": "^1.3.1",
+    "prettier": "^1.18.2",
     "tsify": "^4.0.1",
-    "typescript": "^3.3.3333",
+    "typescript": "^3.6.4",
     "vinyl-buffer": "^1.0.1",
     "vinyl-source-stream": "^2.0.0"
   },
