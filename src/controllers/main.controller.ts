@@ -1,241 +1,213 @@
-import * as PIXI from "pixi.js";
-import { Player } from "../models/player.model";
-import {
-  interval,
-  Observable,
-  from,
-  Observer,
-  of,
-  fromEvent,
-  timer,
-  iif,
-  Subscribable,
-  Subscription
-} from "rxjs";
-import {
-  map,
-  filter,
-  reduce,
-  tap,
-  elementAt,
-  bufferWhen,
-  delay,
-  last
-} from "rxjs/operators";
-import { Pipe } from "../models/pipe.model";
-import {
-  SPRITE_URLS,
-  PHYSICS,
-  CANVAS_SIZE
-} from "../constants/game_config.constants";
-import { CityBg } from "../models/city-bg.model";
-import { ScoreService } from "../services/score.service";
-declare const Bump: any;
+import * as PIXI from 'pixi.js';
+import { interval, Observable, fromEvent, timer, Subject, Subscriber } from 'rxjs';
+import { filter, tap, takeUntil, bufferTime, first } from 'rxjs/operators';
+
+import { SPRITE_URLS, PHYSICS, CANVAS_SIZE } from '../constants/game_config.constants';
+import { ScoreService } from '../services/score.service';
+import { Player } from '../models/player.model';
+import { Pipe } from '../models/pipe.model';
+import { CityBg } from '../models/city-bg.model';
+
+interface GUI {
+  scoreboard: HTMLElement;
+  messages: HTMLElement;
+}
+
 export class MainController {
-  private _app: any;
-  private _player: any;
-  private _bump: any;
-  private _updateSuscription: Subscription;
-  private _obstacleGenerationSubscription: Subscription;
-  private _pressedKey$: Observable<any>;
-  private _frameUpdate$: Observable<number>;
-  private _backgroundUpdate$: Observable<any>;
-  private _gui: any;
-  private _skylineContainer: any;
+  private app: PIXI.Application;
+  private bump: any;
+  private skylineContainer: PIXI.Container;
+
+  private player: Player;
+  private gui: GUI;
+
+  private pressedKey$: Observable<KeyboardEvent>;
+  private frameUpdate$: Observable<number>;
+  private backgroundUpdate$: Observable<number>;
+  private destroy$ = new Subject<void>();
 
   constructor(private view: Document, private scoreService: ScoreService) {
-    this._setupPixi();
+    this.bump = new Bump(PIXI); // LIBRERÍA para detectar colisiones
+
+    this.gui = {
+      scoreboard: this.view.getElementById('scoreboard'),
+      messages: this.view.getElementById('messages'),
+    };
+  }
+
+  public startGame() {
+    this.setupPixi();
     this.init();
   }
-  private _setupPixi() {
-    this._app = new PIXI.Application({
+
+  private setupPixi() {
+    PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
+
+    this.app = new PIXI.Application({
       width: CANVAS_SIZE.WIDTH,
       height: CANVAS_SIZE.HEIGHT,
       antialias: true,
       transparent: false,
-      backgroundColor: 0x1099bb
-    });
-    PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
-    this.view.body.appendChild(this._app.view);
-
-    this._skylineContainer = new PIXI.Container();
-    this._app.stage.addChild(this._skylineContainer);
-  }
-  init() {
-    this._bump = new Bump(PIXI); //LIBRERÍA para detectar colisiones
-    this._cacheGui();
-    this._setObservables();
-    this._setBackground();
-    this._setSkyline();
-    this._setPlayer();
-    this._setObstacles();
-    this._app.stage.setChildIndex(this._skylineContainer, 1);
-  }
-  private _cacheGui() {
-    this._gui = {
-      scoreboard: this.view.getElementById("scoreboard"),
-      messages: this.view.getElementById("messages")
-    };
-  }
-
-  private _setObservables() {
-    this._frameUpdate$ = Observable.create((observer: Observer<number>) => {
-      //  ESTE metodo es nativo de pixi, y es ejecutado cada frame.
-      this._app.ticker.add((delta: number) => {
-        observer.next(delta);
-      });
+      backgroundColor: 0x1099bb,
     });
 
-    this._pressedKey$ = fromEvent(document, "keydown");
+    this.view.body.appendChild(this.app.view);
 
-    this._updateSuscription = this._frameUpdate$.subscribe(delta => {
-      this._checkCollisions();
-    });
+    this.skylineContainer = new PIXI.Container();
+    this.app.stage.addChild(this.skylineContainer);
+  }
 
-    this._backgroundUpdate$ = interval(1000);
+  private init() {
+    this.setObservables();
+    this.setBackground();
+    this.setSkyline();
+    this.setPlayer();
+    this.setObstacles();
+    this.app.stage.setChildIndex(this.skylineContainer, 1);
+  }
 
-    //#region easter egg
-    //"Easter egg". Si se presiona 6 veces cualquier tecla en 1 segundo, se muestra un mensaje
-    this._pressedKey$
+  private setObservables() {
+    this.frameUpdate$ = new Observable((observer: Subscriber<number>) => {
+      const listener = (delta: number) => observer.next(delta);
+
+      // ESTE metodo es nativo de pixi, y es ejecutado cada frame.
+      this.app.ticker.add(listener);
+
+      // NOTE: Teardown logic
+      return () => {
+        this.app.ticker.remove(listener);
+      };
+    }).pipe(takeUntil(this.destroy$));
+
+    this.frameUpdate$.subscribe(() => this.checkCollisions());
+
+    this.pressedKey$ = fromEvent<KeyboardEvent>(document, 'keydown');
+    this.backgroundUpdate$ = interval(1000);
+
+    // "Easter egg". Si se presiona 6 veces cualquier tecla en 1 segundo, se muestra un mensaje
+
+    this.pressedKey$
       .pipe(
-        bufferWhen(() => this._pressedKey$.pipe(delay(1000))),
-        filter((events: any) => events.length >= 7)
+        bufferTime(1000),
+        filter(({ length }) => length > 6),
+        tap(() => {
+          this.gui.messages.innerHTML += 'WOW, SOO POWER<br>';
+        }),
+        takeUntil(this.destroy$),
       )
-      .subscribe(() => {
-        this._gui.messages.innerHTML += "WOW, SOO POWER<br>";
-      });
-    //#endregion
-    //this._pressedKeySubscription = this._pressedKey$.subscribe();
+      .subscribe();
   }
 
-  private _setBackground() {
+  private setBackground() {
     const bg = PIXI.Sprite.from(SPRITE_URLS.IMAGE_BACKGROUND);
 
     bg.anchor.set(0);
     bg.x = 0;
     bg.y = 0;
-    this._app.stage.addChild(bg);
+
+    this.app.stage.addChild(bg);
   }
 
-  private _setPlayer() {
-    this._player = new Player(
-      this._app.stage,
-      this._frameUpdate$,
-      this._pressedKey$
+  private setPlayer() {
+    this.player = new Player(
+      this.app.stage,
+      this.frameUpdate$,
+      this.pressedKey$.pipe(takeUntil(this.destroy$)),
     );
-    console.log(this._player);
+    console.log(this.player);
   }
 
-  private _setSkyline() {
-    this._createSkylinePiece(0);
-    this._backgroundUpdate$.pipe().subscribe(val => this._createSkyline());
+  private setSkyline() {
+    this.createSkylinePiece(0);
+    this.backgroundUpdate$.subscribe(() => this.createSkyline());
   }
 
-  private _createSkyline() {
-    from(this._skylineContainer.children)
-      .pipe(
-        last(),
-        filter((skyline: any) => skyline.position.x <= CANVAS_SIZE.WIDTH)
-      )
-      .subscribe(({ position, width }) =>
-        this._createSkylinePiece(position.x + width)
-      );
+  private createSkyline() {
+    const { children } = this.skylineContainer;
+    const skyline = children[children.length - 1];
+
+    if (skyline.position.x <= CANVAS_SIZE.WIDTH) {
+      // TODO: width?
+      this.createSkylinePiece(skyline.position.x + skyline.width);
+    }
   }
 
-  private _createSkylinePiece(positionX: number) {
-    new CityBg(this._skylineContainer, this._frameUpdate$, {
+  private createSkylinePiece(positionX: number) {
+    new CityBg(this.skylineContainer, this.frameUpdate$, {
       x: positionX,
-      y: CANVAS_SIZE.HEIGHT
+      y: CANVAS_SIZE.HEIGHT,
     });
   }
 
-  private _setObstacles() {
+  private setObstacles() {
     // OPERADOR que espera X tiempo antes de empezar el intervalo.
-    this._obstacleGenerationSubscription = timer(
-      PHYSICS.PIPE_GENERATION_FIRST_WAIT,
-      PHYSICS.PIPE_GENERATION_INTERVAL
-    ).subscribe(val => {
-      this._createPipe();
-      this._deletePipes();
-      this._updateScore();
-    });
-  }
-
-  /*************** */
-  private _createPipe() {
-    new Pipe(this._app.stage, this._frameUpdate$);
-  }
-
-  private _deletePipes() {
-    from(this._app.stage.children)
-      .pipe(
-        filter((pipe: any) => pipe !== undefined),
-        filter(({ type }) => type === "pipe"),
-        filter((pipe: any) => pipe.position.x < 0)
-      )
-      .subscribe((pipe: any) => {
-        this._app.stage.removeChild(pipe);
+    timer(PHYSICS.PIPE_GENERATION_FIRST_WAIT, PHYSICS.PIPE_GENERATION_INTERVAL)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.createPipe();
+        this.deleteOldPipes();
+        this.updateScore();
       });
   }
 
-  private _updateScore() {
+  private createPipe() {
+    new Pipe(this.app.stage, this.frameUpdate$);
+  }
+
+  private deleteOldPipes() {
+    this.app.stage.children
+      .filter(Boolean)
+      .filter(({ type }) => type === 'pipe')
+      .filter(({ position }) => position.x < 0)
+      .forEach(pipe => this.app.stage.removeChild(pipe));
+  }
+
+  private updateScore() {
     this.scoreService.add();
-    this._gui.scoreboard.innerHTML = this.scoreService.score + "";
+    this.gui.scoreboard.innerHTML = `${this.scoreService.score}`;
   }
 
-  private _checkCollisions() {
-    from(this._app.stage.children)
-      .pipe(
-        filter((element: any) => element.type === "pipe"),
-        reduce(
-          (acc, pipe) => this._bump.hit(this._player.sprite, pipe) || acc,
-          false
-        ),
-        filter((isHit: boolean) => isHit)
-      )
-      .subscribe(hit => {
-        this._gameOver();
-      });
+  private checkCollisions() {
+    const { children } = this.app.stage;
+
+    if (
+      children
+        .filter(({ type }) => type === 'pipe')
+        .some(pipe => this.bump.hit(this.player.sprite, pipe))
+    ) {
+      this.gameOver();
+    }
   }
 
-  private _gameOver() {
-    this._unsubscribe();
-    this._showGameoverInfo();
+  private gameOver() {
+    this.player.killKiwi();
 
-    from(this._app.stage.children)
-      // Comprobar si el objeto posee la propiedad gameOver (es decir, puede ser """asesinado""")
-      .pipe(filter((element: any) => typeof element.gameOver !== "undefined"))
-      .subscribe((element: any) => {
-        element.gameOver();
-      });
+    this.unsubscribe();
+    this.showGameoverInfo();
 
-    timer(600).subscribe(() => this._waitToRestart()); //Evita que se pueda reiniciar el nivel instantaneamente.
-    //setTimeout(() => this._waitToRestart(), 500);     //Evita que se pueda reiniciar el nivel instantaneamente. (version clasica)
+    this.pressedKey$.pipe(first()).subscribe(() => this.resetGame());
   }
 
-  private _showGameoverInfo() {
+  private showGameoverInfo() {
     const gameOverSprite = PIXI.Sprite.from(SPRITE_URLS.GAME_OVER_TEXT);
+
     gameOverSprite.anchor.set(0.5);
     gameOverSprite.position.set(CANVAS_SIZE.WIDTH / 2, CANVAS_SIZE.HEIGHT / 3);
     gameOverSprite.scale.set(10);
-    this._app.stage.addChild(gameOverSprite);
+
+    this.app.stage.addChild(gameOverSprite);
   }
 
-  private _waitToRestart() {
-    console.log("Waiting");
-    this._pressedKey$.subscribe(() => {
-      this._resetGame();
-    });
+  private unsubscribe() {
+    this.destroy$.next();
   }
 
-  private _unsubscribe() {
-    this._updateSuscription.unsubscribe();
-    this._obstacleGenerationSubscription.unsubscribe();
-  }
+  private resetGame() {
+    this.scoreService.reset();
 
-  private _resetGame() {
-    /*Deletes sprites */
-    //this.app.stage.destroy(true);
-    location.reload();
+    // NOTE: Destroy all
+    this.app.destroy(true, { texture: true, children: true, baseTexture: true });
+
+    this.startGame();
   }
 }

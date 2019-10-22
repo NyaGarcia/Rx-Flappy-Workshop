@@ -1,81 +1,61 @@
-import * as PIXI from "pixi.js";
-import { interval, Observable, timer } from "rxjs";
-import { filter } from "rxjs/operators";
-import {
-  PHYSICS,
-  CANVAS_SIZE,
-  SPRITE_URLS
-} from "../constants/game_config.constants";
+import * as PIXI from 'pixi.js';
+import { Observable } from 'rxjs';
+import { filter, tap, debounceTime } from 'rxjs/operators';
+
+import { PHYSICS, CANVAS_SIZE, SPRITE_URLS } from '../constants/game_config.constants';
 
 export class Player {
   private ySpeed: number;
   public sprite: any;
-  private _updateSubscription: any;
-  private _flapSuscription: any;
-  private _isHitGround$: any;
 
   constructor(
     public stage: PIXI.Container,
-    private frameUpdate$: Observable<any>,
-    private flap$: Observable<any>
+    private frameUpdate$: Observable<number>,
+    private flap$: Observable<KeyboardEvent>,
   ) {
-    this._createGameObject();
-    this._suscribeObservables();
+    this.createGameObject();
+    this.suscribeObservables();
   }
 
-  private _createGameObject() {
+  public killKiwi() {
+    this.sprite.rotation = 180;
+  }
+
+  private createGameObject() {
     this.sprite = PIXI.Sprite.from(SPRITE_URLS.PLAYER.INITIAL);
     this.ySpeed = 0;
     this.sprite.anchor.set(0.5);
     this.sprite.position.set(250, CANVAS_SIZE.HEIGHT / 2);
     this.sprite.scale.set(5);
 
-    this.sprite.gameOver = this.gameOver;
     this.stage.addChild(this.sprite);
   }
 
-  private _suscribeObservables() {
-    this._updateSubscription = this.frameUpdate$.subscribe(delta => {
-      this._calculateGravity(delta);
-    });
+  private suscribeObservables() {
+    this.frameUpdate$.subscribe(delta => this.calculateGravity(delta));
 
-    this._flapSuscription = this.flap$
-      .pipe(filter(event => event.keyCode === 32 || event.keyCode === 38))
-      .subscribe(event => {
-        this._flap();
-      });
+    this.flap$
+      .pipe(
+        filter(({ keyCode }) => keyCode === 32 || keyCode === 38),
+        tap(() => this.flap()),
+        debounceTime(250),
+        tap(() => this.changeAnimation(SPRITE_URLS.PLAYER.INITIAL)),
+      )
+      .subscribe();
   }
 
-  private _calculateGravity(delta: number) {
+  private calculateGravity(delta: number) {
     this.ySpeed += PHYSICS.GRAVITY * delta;
     this.sprite.position.y += this.ySpeed;
   }
 
-  private _flap() {
+  private flap() {
     this.ySpeed = -PHYSICS.FLAP_POWER;
-    this._changeAnimation(SPRITE_URLS.PLAYER.FLAPPING);
-
-    timer(250).subscribe(data => {
-      this._changeAnimation(SPRITE_URLS.PLAYER.INITIAL);
-    });
+    this.changeAnimation(SPRITE_URLS.PLAYER.FLAPPING);
   }
 
-  private _changeAnimation(url: string) {
+  private changeAnimation(url: string) {
     const texture = PIXI.Texture.from(url);
     this.sprite.texture = texture;
-  }
-
-  public gameOver = () => {
-    this._unsubscribe();
-    this._killKiwi();
-  };
-
-  private _unsubscribe() {
-    this._updateSubscription.unsubscribe();
-    this._flapSuscription.unsubscribe();
-  }
-
-  private _killKiwi() {
-    this.sprite.rotation = 180;
   }
 }
