@@ -8,7 +8,6 @@ import { takeUntil } from 'rxjs/operators';
 
 export class MainController {
   private app: PIXI.Application;
-  private bump: any;
   private skylineContainer: PIXI.Container;
 
   private player: Player;
@@ -16,9 +15,7 @@ export class MainController {
   private pressedKey$: Observable<KeyboardEvent>;
   private destroy$ = new Subject<void>();
 
-  constructor(private view: Document) {
-    this.bump = new Bump(PIXI);
-  }
+  constructor(private view: Document) {}
 
   public startGame() {
     this.setupPixi();
