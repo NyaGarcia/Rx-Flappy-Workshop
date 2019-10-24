@@ -13,7 +13,6 @@ export class MainController {
   private player: Player;
 
   private pressedKey$: Observable<KeyboardEvent>;
-  private destroy$ = new Subject<void>();
 
   constructor(private view: Document) {}
 
@@ -61,6 +60,6 @@ export class MainController {
   }
 
   private setPlayer() {
-    this.player = new Player(this.app.stage, this.pressedKey$.pipe(takeUntil(this.destroy$)));
+    this.player = new Player(this.app.stage, this.pressedKey$);
   }
 }
