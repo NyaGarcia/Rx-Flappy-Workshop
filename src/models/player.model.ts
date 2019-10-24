@@ -1,19 +1,14 @@
 import * as PIXI from 'pixi.js';
 
-import { CANVAS_SIZE, PHYSICS, SPRITE_URLS } from '../constants/game_config.constants';
+import { CANVAS_SIZE, SPRITE_URLS } from '../constants/game_config.constants';
 import { delay, filter, tap } from 'rxjs/operators';
 
 import { Observable } from 'rxjs';
 
 export class Player {
-  private ySpeed: number;
   public sprite: any;
 
-  constructor(
-    public stage: PIXI.Container,
-    private frameUpdate$: Observable<number>,
-    private flap$: Observable<KeyboardEvent>,
-  ) {
+  constructor(public stage: PIXI.Container, private flap$: Observable<KeyboardEvent>) {
     this.createGameObject();
     this.suscribeObservables();
   }
@@ -24,7 +19,6 @@ export class Player {
 
   private createGameObject() {
     this.sprite = PIXI.Sprite.from(SPRITE_URLS.PLAYER.INITIAL);
-    this.ySpeed = 0;
     this.sprite.anchor.set(0.5);
     this.sprite.position.set(250, CANVAS_SIZE.HEIGHT / 2);
     this.sprite.scale.set(5);
@@ -33,11 +27,6 @@ export class Player {
   }
 
   private suscribeObservables() {
-    this.frameUpdate$.subscribe(delta => {
-      console.log(delta);
-      this.calculateGravity(delta);
-    });
-
     this.flap$
       .pipe(
         filter(({ keyCode }) => keyCode === 32 || keyCode === 38),
@@ -48,13 +37,7 @@ export class Player {
       .subscribe();
   }
 
-  private calculateGravity(delta: number) {
-    this.ySpeed += PHYSICS.GRAVITY * delta;
-    this.sprite.position.y += this.ySpeed;
-  }
-
   private flap() {
-    this.ySpeed = -PHYSICS.FLAP_POWER;
     this.changeAnimation(SPRITE_URLS.PLAYER.FLAPPING);
   }
 
