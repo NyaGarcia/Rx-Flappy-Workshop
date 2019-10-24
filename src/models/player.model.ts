@@ -1,8 +1,9 @@
 import * as PIXI from 'pixi.js';
-import { Observable } from 'rxjs';
-import { filter, tap, debounceTime } from 'rxjs/operators';
 
-import { PHYSICS, CANVAS_SIZE, SPRITE_URLS } from '../constants/game_config.constants';
+import { CANVAS_SIZE, PHYSICS, SPRITE_URLS } from '../constants/game_config.constants';
+import { delay, filter, tap } from 'rxjs/operators';
+
+import { Observable } from 'rxjs';
 
 export class Player {
   private ySpeed: number;
@@ -32,13 +33,16 @@ export class Player {
   }
 
   private suscribeObservables() {
-    this.frameUpdate$.subscribe(delta => this.calculateGravity(delta));
+    this.frameUpdate$.subscribe(delta => {
+      console.log(delta);
+      this.calculateGravity(delta);
+    });
 
     this.flap$
       .pipe(
         filter(({ keyCode }) => keyCode === 32 || keyCode === 38),
         tap(() => this.flap()),
-        debounceTime(250),
+        delay(150),
         tap(() => this.changeAnimation(SPRITE_URLS.PLAYER.INITIAL)),
       )
       .subscribe();
