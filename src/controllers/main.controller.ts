@@ -1,12 +1,13 @@
 import * as PIXI from 'pixi.js';
-import { interval, Observable, fromEvent, timer, Subject, Subscriber } from 'rxjs';
-import { filter, tap, takeUntil, bufferTime, first } from 'rxjs/operators';
 
-import { SPRITE_URLS, PHYSICS, CANVAS_SIZE } from '../constants/game_config.constants';
-import { ScoreService } from '../services/score.service';
-import { Player } from '../models/player.model';
-import { Pipe } from '../models/pipe.model';
+import { CANVAS_SIZE, PHYSICS, SPRITE_URLS } from '../constants/game_config.constants';
+import { Observable, Subject, Subscriber, fromEvent, interval, timer } from 'rxjs';
+import { bufferTime, filter, first, takeUntil, tap } from 'rxjs/operators';
+
 import { CityBg } from '../models/city-bg.model';
+import { Pipe } from '../models/pipe.model';
+import { Player } from '../models/player.model';
+import { ScoreService } from '../services/score.service';
 
 interface GUI {
   scoreboard: HTMLElement;
@@ -91,7 +92,7 @@ export class MainController {
         bufferTime(1000),
         filter(({ length }) => length > 6),
         tap(() => {
-          this.gui.messages.innerHTML += 'WOW, SOO POWER<br>';
+          this.gui.messages.innerHTML += 'WOW, SO MUCH POWER<br>';
         }),
         takeUntil(this.destroy$),
       )
@@ -140,7 +141,6 @@ export class MainController {
   }
 
   private setObstacles() {
-    // OPERADOR que espera X tiempo antes de empezar el intervalo.
     timer(PHYSICS.PIPE_GENERATION_FIRST_WAIT, PHYSICS.PIPE_GENERATION_INTERVAL)
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
