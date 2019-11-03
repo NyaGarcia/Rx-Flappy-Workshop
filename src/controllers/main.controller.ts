@@ -4,10 +4,13 @@ import { CANVAS_SIZE, PHYSICS, SPRITE_URLS } from '../constants/game_config.cons
 import { Observable, Subject, Subscriber, fromEvent, interval, timer } from 'rxjs';
 import { bufferTime, filter, first, takeUntil, tap } from 'rxjs/operators';
 
-import { CityBg } from '../models/city-bg.model';
 import { Pipe } from '../models/pipe.model';
+import { PipeService } from '../services/pipe.service';
 import { Player } from '../models/player.model';
+import { PlayerService } from '../services/player.service';
 import { ScoreService } from '../services/score.service';
+import { Skyline } from '../models/skyline.model';
+import { SkylineService } from '../services/skyline.service';
 
 interface GUI {
   scoreboard: HTMLElement;
@@ -19,7 +22,6 @@ export class MainController {
   private bump: any;
   private skylineContainer: PIXI.Container;
 
-  private player: Player;
   private gui: GUI;
 
   private pressedKey$: Observable<KeyboardEvent>;
@@ -27,8 +29,12 @@ export class MainController {
   private backgroundUpdate$: Observable<number>;
   private destroy$ = new Subject<void>();
 
+  private playerService: PlayerService;
+  private skylineService: SkylineService;
+  private pipeService: PipeService;
+
   constructor(private view: Document, private scoreService: ScoreService) {
-    this.bump = new Bump(PIXI); // LIBRERÍA para detectar colisiones
+    this.bump = new Bump(PIXI);
 
     this.gui = {
       scoreboard: this.view.getElementById('scoreboard'),
@@ -60,6 +66,7 @@ export class MainController {
 
   private init() {
     this.setObservables();
+    this.setServices();
     this.setBackground();
     this.setSkyline();
     this.setPlayer();
@@ -71,7 +78,6 @@ export class MainController {
     this.frameUpdate$ = new Observable((observer: Subscriber<number>) => {
       const listener = (delta: number) => observer.next(delta);
 
-      // ESTE metodo es nativo de pixi, y es ejecutado cada frame.
       this.app.ticker.add(listener);
 
       // NOTE: Teardown logic
@@ -85,8 +91,7 @@ export class MainController {
     this.pressedKey$ = fromEvent<KeyboardEvent>(document, 'keydown');
     this.backgroundUpdate$ = interval(1000);
 
-    // "Easter egg". Si se presiona 6 veces cualquier tecla en 1 segundo, se muestra un mensaje
-
+    // "Easter egg"
     this.pressedKey$
       .pipe(
         bufferTime(1000),
@@ -99,6 +104,17 @@ export class MainController {
       .subscribe();
   }
 
+  private setServices() {
+    this.playerService = this.playerService = new PlayerService(
+      this.app.stage,
+      this.frameUpdate$,
+      this.pressedKey$.pipe(takeUntil(this.destroy$)),
+    );
+    this.skylineService = new SkylineService(this.frameUpdate$, this.skylineContainer);
+
+    this.pipeService = new PipeService(this.frameUpdate$, this.app.stage);
+  }
+
   private setBackground() {
     const bg = PIXI.Sprite.from(SPRITE_URLS.IMAGE_BACKGROUND);
 
@@ -109,57 +125,58 @@ export class MainController {
     this.app.stage.addChild(bg);
   }
 
-  private setPlayer() {
-    this.player = new Player(
-      this.app.stage,
-      this.frameUpdate$,
-      this.pressedKey$.pipe(takeUntil(this.destroy$)),
-    );
-    console.log(this.player);
+  private setPlayer(): void {
+    this.playerService.setPlayer(this.createPlayer());
   }
 
-  private setSkyline() {
-    this.createSkylinePiece(0);
+  private createPlayer(): Player {
+    return new Player(this.app.stage);
+  }
+
+  private setSkyline(): void {
+    this.createInitialSkyline();
     this.backgroundUpdate$.subscribe(() => this.createSkyline());
   }
 
-  private createSkyline() {
-    const { children } = this.skylineContainer;
-    const skyline = children[children.length - 1];
-
-    if (skyline.position.x <= CANVAS_SIZE.WIDTH) {
-      // TODO: width?
-      this.createSkylinePiece(skyline.position.x + skyline.width);
+  private createInitialSkyline(): void {
+    for (let i = 0; i < 3; i++) {
+      this.createSkylinePiece(i * 500);
     }
   }
 
-  private createSkylinePiece(positionX: number) {
-    new CityBg(this.skylineContainer, this.frameUpdate$, {
+  private createSkyline(): void {
+    const lastSkyline = this.skylineService.getLastSkylineObject();
+
+    if (lastSkyline.position.x <= CANVAS_SIZE.WIDTH) {
+      this.createSkylinePiece(lastSkyline.position.x + lastSkyline.width);
+    }
+  }
+
+  private createSkylinePiece(positionX: number): void {
+    const skyline = new Skyline({
       x: positionX,
       y: CANVAS_SIZE.HEIGHT,
     });
+
+    this.skylineService.addSkyline(skyline);
   }
 
-  private setObstacles() {
+  private setObstacles(): void {
     timer(PHYSICS.PIPE_GENERATION_FIRST_WAIT, PHYSICS.PIPE_GENERATION_INTERVAL)
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
-        this.createPipe();
-        this.deleteOldPipes();
+        this.createPipeSet();
+        this.pipeService.deleteOldPipes();
         this.updateScore();
       });
   }
 
-  private createPipe() {
-    new Pipe(this.app.stage, this.frameUpdate$);
-  }
+  private createPipeSet() {
+    const bottomPipe = new Pipe(this.frameUpdate$);
+    this.pipeService.addPipe(bottomPipe);
 
-  private deleteOldPipes() {
-    this.app.stage.children
-      .filter(Boolean)
-      .filter(({ type }) => type === 'pipe')
-      .filter(({ position }) => position.x < 0)
-      .forEach(pipe => this.app.stage.removeChild(pipe));
+    const topPipe = new Pipe(this.frameUpdate$, bottomPipe.getSprite());
+    this.pipeService.addPipe(topPipe);
   }
 
   private updateScore() {
@@ -173,14 +190,14 @@ export class MainController {
     if (
       children
         .filter(({ type }) => type === 'pipe')
-        .some(pipe => this.bump.hit(this.player.sprite, pipe))
+        .some(pipe => this.bump.hit(this.playerService.getSprite(), pipe))
     ) {
       this.gameOver();
     }
   }
 
   private gameOver() {
-    this.player.killKiwi();
+    this.playerService.killKiwi();
 
     this.unsubscribe();
     this.showGameoverInfo();
