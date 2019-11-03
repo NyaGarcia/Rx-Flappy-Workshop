@@ -15,11 +15,11 @@ export class Pipe {
     return this.sprite;
   }
 
-  public updatePosition(delta: number) {
+  public updatePosition(delta: number): void {
     this.sprite.position.x -= PHYSICS.PIPE_SPEED * delta;
   }
 
-  private createGameObject(parent?: PIXI.Sprite) {
+  private createGameObject(parent?: PIXI.Sprite): void {
     this.sprite = PIXI.Sprite.from(SPRITE_URLS.PIPE);
 
     const anchor = {
@@ -44,7 +44,7 @@ export class Pipe {
     this.sprite.type = 'pipe';
   }
 
-  private getRandomHeight() {
+  private getRandomHeight(): number {
     return Math.floor(Math.random() * 500) + 500;
   }
 }
