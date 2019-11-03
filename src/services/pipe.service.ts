@@ -4,12 +4,12 @@ import { Pipe } from '../models/pipe.model';
 export class PipeService {
   constructor(private frameUpdate$: Observable<number>, private stage: PIXI.Container) {}
 
-  public addPipe(pipe: Pipe) {
+  public addPipe(pipe: Pipe): void {
     this.stage.addChild(pipe.getSprite());
     this.subscribe(pipe);
   }
 
-  public deleteOldPipes() {
+  public deleteOldPipes(): void {
     this.stage.children
       .filter(Boolean)
       .filter(({ type }) => type === 'pipe')
@@ -17,7 +17,7 @@ export class PipeService {
       .forEach(pipe => this.stage.removeChild(pipe));
   }
 
-  private subscribe(pipe: Pipe) {
+  private subscribe(pipe: Pipe): void {
     this.frameUpdate$.subscribe(delta => pipe.updatePosition(delta));
   }
 }
