@@ -42,12 +42,12 @@ export class MainController {
     };
   }
 
-  public startGame() {
+  public startGame(): void {
     this.setupPixi();
     this.init();
   }
 
-  private setupPixi() {
+  private setupPixi(): void {
     PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 
     this.app = new PIXI.Application({
@@ -64,7 +64,7 @@ export class MainController {
     this.app.stage.addChild(this.skylineContainer);
   }
 
-  private init() {
+  private init(): void {
     this.setObservables();
     this.setServices();
     this.setBackground();
@@ -74,7 +74,7 @@ export class MainController {
     this.app.stage.setChildIndex(this.skylineContainer, 1);
   }
 
-  private setObservables() {
+  private setObservables(): void {
     this.frameUpdate$ = new Observable((observer: Subscriber<number>) => {
       const listener = (delta: number) => observer.next(delta);
 
@@ -104,7 +104,7 @@ export class MainController {
       .subscribe();
   }
 
-  private setServices() {
+  private setServices(): void {
     this.playerService = this.playerService = new PlayerService(
       this.app.stage,
       this.frameUpdate$,
@@ -115,7 +115,7 @@ export class MainController {
     this.pipeService = new PipeService(this.frameUpdate$, this.app.stage);
   }
 
-  private setBackground() {
+  private setBackground(): void {
     const bg = PIXI.Sprite.from(SPRITE_URLS.IMAGE_BACKGROUND);
 
     bg.anchor.set(0);
@@ -171,7 +171,7 @@ export class MainController {
       });
   }
 
-  private createPipeSet() {
+  private createPipeSet(): void {
     const bottomPipe = new Pipe(this.frameUpdate$);
     this.pipeService.addPipe(bottomPipe);
 
@@ -179,12 +179,12 @@ export class MainController {
     this.pipeService.addPipe(topPipe);
   }
 
-  private updateScore() {
+  private updateScore(): void {
     this.scoreService.add();
     this.gui.scoreboard.innerHTML = `${this.scoreService.score}`;
   }
 
-  private checkCollisions() {
+  private checkCollisions(): void {
     const { children } = this.app.stage;
 
     if (
@@ -196,7 +196,7 @@ export class MainController {
     }
   }
 
-  private gameOver() {
+  private gameOver(): void {
     this.playerService.killKiwi();
 
     this.unsubscribe();
@@ -205,7 +205,7 @@ export class MainController {
     this.pressedKey$.pipe(first()).subscribe(() => this.resetGame());
   }
 
-  private showGameoverInfo() {
+  private showGameoverInfo(): void {
     const gameOverSprite = PIXI.Sprite.from(SPRITE_URLS.GAME_OVER_TEXT);
 
     gameOverSprite.anchor.set(0.5);
@@ -215,11 +215,11 @@ export class MainController {
     this.app.stage.addChild(gameOverSprite);
   }
 
-  private unsubscribe() {
+  private unsubscribe(): void {
     this.destroy$.next();
   }
 
-  private resetGame() {
+  private resetGame(): void {
     this.scoreService.reset();
 
     // NOTE: Destroy all
