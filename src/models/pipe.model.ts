@@ -1,33 +1,30 @@
 import * as PIXI from 'pixi.js';
-import { Observable } from 'rxjs';
 
-import { SPRITE_URLS, PHYSICS, CANVAS_SIZE, PARAMS } from '../constants/game_config.constants';
+import { CANVAS_SIZE, PARAMS, PHYSICS, SPRITE_URLS } from '../constants/game_config.constants';
+
+import { Observable } from 'rxjs';
 
 export class Pipe {
   public sprite: PIXI.Sprite;
 
-  private frameUpdateSubscription = this.frameUpdate$.subscribe(delta =>
-    this.updatePosition(delta),
-  );
-
-  private unsubscribe = () => this.frameUpdateSubscription.unsubscribe();
-
-  constructor(
-    public stage: PIXI.Container,
-    private frameUpdate$: Observable<number>,
-    parent?: PIXI.Sprite,
-  ) {
+  constructor(private frameUpdate$: Observable<number>, parent?: PIXI.Sprite) {
     this.createGameObject(parent);
+  }
+
+  public getSprite(): PIXI.Sprite {
+    return this.sprite;
+  }
+
+  public updatePosition(delta: number) {
+    this.sprite.position.x -= PHYSICS.PIPE_SPEED * delta;
   }
 
   private createGameObject(parent?: PIXI.Sprite) {
     this.sprite = PIXI.Sprite.from(SPRITE_URLS.PIPE);
 
-    // TODO: improve this
     const anchor = {
       x: 0.5,
-      // TODO: -0.5??
-      y: parent ? 0.5 : 0.5,
+      y: 0.5,
     };
 
     const pos = {
@@ -45,18 +42,6 @@ export class Pipe {
     this.sprite.scale.set(scale.x, scale.y);
 
     this.sprite.type = 'pipe';
-
-    this.stage.addChild(this.sprite);
-
-    this.sprite.once('removed', this.unsubscribe);
-
-    if (!parent) {
-      new Pipe(this.stage, this.frameUpdate$, this.sprite);
-    }
-  }
-
-  private updatePosition(delta: number) {
-    this.sprite.position.x -= PHYSICS.PIPE_SPEED * delta;
   }
 
   private getRandomHeight() {
