@@ -1,5 +1,4 @@
-import { Observable, Subject } from 'rxjs';
-
+import { Observable } from 'rxjs';
 import { Pipe } from '../models/pipe.model';
 
 export class PipeService {
