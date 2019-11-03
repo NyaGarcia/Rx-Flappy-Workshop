@@ -5,12 +5,27 @@ import { Player } from '../models/player.model';
 import { SPRITE_URLS } from '../constants/game_config.constants';
 
 export class PlayerService {
+  private player: Player;
+
   constructor(
+    private stage: PIXI.Container,
     private frameUpdate$: Observable<number>,
     private pressedKey$: Observable<KeyboardEvent>,
-    private player: Player,
   ) {
     this.subscribe();
+  }
+
+  public setPlayer(player: Player) {
+    this.stage.addChild(player.getSprite());
+    this.player = player;
+  }
+
+  public getSprite(): PIXI.Sprite {
+    return this.player.getSprite();
+  }
+
+  public killKiwi(): void {
+    this.player.killKiwi();
   }
 
   private subscribe() {
