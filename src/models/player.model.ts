@@ -1,28 +1,39 @@
 import * as PIXI from 'pixi.js';
 
 import { CANVAS_SIZE, PHYSICS, SPRITE_URLS } from '../constants/game_config.constants';
-import { delay, filter, tap } from 'rxjs/operators';
-
-import { Observable } from 'rxjs';
 
 export class Player {
   private ySpeed: number;
-  public sprite: any;
+  private sprite: any;
 
-  constructor(
-    public stage: PIXI.Container,
-    private frameUpdate$: Observable<number>,
-    private flap$: Observable<KeyboardEvent>,
-  ) {
+  constructor(public stage: PIXI.Container) {
     this.createGameObject();
-    this.suscribeObservables();
   }
 
-  public killKiwi() {
+  public getSprite(): PIXI.Sprite {
+    return this.sprite;
+  }
+
+  public killKiwi(): void {
     this.sprite.rotation = 180;
   }
 
-  private createGameObject() {
+  public calculateGravity(delta: number): void {
+    this.ySpeed += PHYSICS.GRAVITY * delta;
+    this.sprite.position.y += this.ySpeed;
+  }
+
+  public flap(): void {
+    this.ySpeed = -PHYSICS.FLAP_POWER;
+    this.changeAnimation(SPRITE_URLS.PLAYER.FLAPPING);
+  }
+
+  public changeAnimation(url: string): void {
+    const texture = PIXI.Texture.from(url);
+    this.sprite.texture = texture;
+  }
+
+  private createGameObject(): void {
     this.sprite = PIXI.Sprite.from(SPRITE_URLS.PLAYER.INITIAL);
     this.ySpeed = 0;
     this.sprite.anchor.set(0.5);
@@ -30,36 +41,5 @@ export class Player {
     this.sprite.scale.set(5);
 
     this.stage.addChild(this.sprite);
-  }
-
-  private suscribeObservables() {
-    this.frameUpdate$.subscribe(delta => {
-      console.log(delta);
-      this.calculateGravity(delta);
-    });
-
-    this.flap$
-      .pipe(
-        filter(({ keyCode }) => keyCode === 32 || keyCode === 38),
-        tap(() => this.flap()),
-        delay(150),
-        tap(() => this.changeAnimation(SPRITE_URLS.PLAYER.INITIAL)),
-      )
-      .subscribe();
-  }
-
-  private calculateGravity(delta: number) {
-    this.ySpeed += PHYSICS.GRAVITY * delta;
-    this.sprite.position.y += this.ySpeed;
-  }
-
-  private flap() {
-    this.ySpeed = -PHYSICS.FLAP_POWER;
-    this.changeAnimation(SPRITE_URLS.PLAYER.FLAPPING);
-  }
-
-  private changeAnimation(url: string) {
-    const texture = PIXI.Texture.from(url);
-    this.sprite.texture = texture;
   }
 }
