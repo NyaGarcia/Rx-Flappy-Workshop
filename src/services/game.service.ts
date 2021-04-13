@@ -1,9 +1,13 @@
-import { Observable } from 'rxjs';
+import { KEYS } from '../constants/game-config.constants';
+import { filter } from 'rxjs/operators';
+import { fromEvent } from 'rxjs';
 
 export class GameService {
-  /* TODO 1 (hint: use fromEvent) */
-  private pressedKey$: Observable<KeyboardEvent>;
+  /* TODO 1: Solution */
+  private pressedKey$ = fromEvent<KeyboardEvent>(document, 'keydown');
 
-  /* TODO 2 (hint: create an Observable from pressedKey$ and use the filter operator) */
-  public onFlap$: Observable<KeyboardEvent>;
+  /* TODO 2: Solution */
+  public onFlap$ = this.pressedKey$.pipe(
+    filter(({ code }) => code === KEYS.SPACE || code === KEYS.UP),
+  );
 }
