@@ -1,20 +1,16 @@
 import * as PIXI from 'pixi.js';
 
 import { CANVAS_SIZE, SPRITE_URLS } from '../constants/game_config.constants';
-import { Observable, Subject, fromEvent } from 'rxjs';
 
+import { GameService } from '../services/game.service';
 import { Player } from '../models/player.model';
-import { takeUntil } from 'rxjs/operators';
 
 export class MainController {
   private app: PIXI.Application;
   private skylineContainer: PIXI.Container;
-
   private player: Player;
 
-  private pressedKey$: Observable<KeyboardEvent>;
-
-  constructor(private view: Document) {}
+  constructor(private view: Document, private gameService: GameService) {}
 
   public startGame() {
     this.setupPixi();
@@ -39,14 +35,9 @@ export class MainController {
   }
 
   private init() {
-    this.setObservables();
     this.setBackground();
-    this.setPlayer();
+    this.createPlayer();
     this.app.stage.setChildIndex(this.skylineContainer, 1);
-  }
-
-  private setObservables() {
-    this.pressedKey$ = fromEvent<KeyboardEvent>(document, 'keydown');
   }
 
   private setBackground() {
@@ -59,7 +50,8 @@ export class MainController {
     this.app.stage.addChild(bg);
   }
 
-  private setPlayer() {
-    this.player = new Player(this.app.stage, this.pressedKey$);
+  private createPlayer() {
+    this.player = new Player();
+    this.app.stage.addChild(this.player.sprite);
   }
 }
