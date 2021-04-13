@@ -1,7 +1,7 @@
 export const CANVAS_SIZE = {
   HEIGHT: 600,
   WIDTH: 1000,
-} as const;
+};
 
 export const KEYS = {
   SPACE: 'Space',
@@ -17,7 +17,7 @@ export const SPRITE_URLS = {
   IMAGE_BACKGROUND: 'assets/backgrounds/background.jpg',
   SKYLINE: 'assets/backgrounds/skyline.png',
   GAME_OVER_TEXT: 'assets/sprites/game-over.png',
-} as const;
+};
 
 export const PHYSICS = {
   PIPE_SPEED: 1.75,
@@ -26,8 +26,9 @@ export const PHYSICS = {
   PIPE_GENERATION_INTERVAL: 2500,
   GRAVITY: 0.15,
   FLAP_POWER: 5,
-} as const;
+  FLAP_DELAY: 150,
+};
 
 export const PARAMS = {
   VERTICAL_PIPES_SEPARATION: 1000,
-} as const;
+};
