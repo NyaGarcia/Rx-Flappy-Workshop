@@ -1,6 +1,6 @@
 import * as PIXI from 'pixi.js';
 
-import { CANVAS_SIZE, SPRITE_URLS } from '../constants/game-config.constants';
+import { CANVAS_SIZE, PHYSICS, SPRITE_URLS } from '../constants/game-config.constants';
 
 import { Sprite } from 'pixi.js';
 
@@ -24,7 +24,14 @@ export class Player {
     this.sprite.rotation = 180;
   }
 
+  // New method
+  public setGravity(delta: number): void {
+    this.ySpeed += PHYSICS.GRAVITY * delta;
+    this.sprite.position.y += this.ySpeed;
+  }
+
   public flap() {
+    this.ySpeed = -PHYSICS.FLAP_POWER; // New line (gravity)
     this.sprite.texture = PIXI.Texture.from(this.flapPosition);
     this.flapPosition = this.nextFlapPosition();
   }

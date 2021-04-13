@@ -33,6 +33,11 @@ export class MainController {
 
     this.skylineContainer = new PIXI.Container();
     this.app.stage.addChild(this.skylineContainer);
+
+    // Ticker is used to game-loop
+    this.app.ticker.add((delta: number) => {
+      // TODO2 (hint: Pass the delta value to onFrameUpdate$)
+    });
   }
 
   private init() {
@@ -55,7 +60,9 @@ export class MainController {
     this.player = new Player();
     this.app.stage.addChild(this.player.sprite);
 
-    /* TODO 3: Solution */
+    /* TODO3 (hint: subscribe to onFrameUpdate to player's setGravity) */
+    this.gameService.onFrameUpdate$;
+
     this.gameService.onFlap$
       .pipe(
         tap(() => this.player.flap()),
