@@ -53,5 +53,11 @@ export class MainController {
   private createPlayer() {
     this.player = new Player();
     this.app.stage.addChild(this.player.sprite);
+
+    this.gameService.onFlap$
+      .pipe
+      /* TODO 3 (hint: use tap + delay to change Kiwi's animation) */
+      ()
+      .subscribe();
   }
 }
