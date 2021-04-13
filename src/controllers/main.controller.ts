@@ -1,6 +1,7 @@
 import * as PIXI from 'pixi.js';
 
-import { CANVAS_SIZE, SPRITE_URLS } from '../constants/game-config.constants';
+import { CANVAS_SIZE, PHYSICS, SPRITE_URLS } from '../constants/game-config.constants';
+import { delay, tap } from 'rxjs/operators';
 
 import { GameService } from '../services/game.service';
 import { Player } from '../models/player.model';
@@ -54,10 +55,13 @@ export class MainController {
     this.player = new Player();
     this.app.stage.addChild(this.player.sprite);
 
+    /* TODO 3: Solution */
     this.gameService.onFlap$
-      .pipe
-      /* TODO 3 (hint: use tap + delay to change Kiwi's animation) */
-      ()
+      .pipe(
+        tap(() => this.player.flap()),
+        delay(PHYSICS.FLAP_DELAY),
+        tap(() => this.player.flap()),
+      )
       .subscribe();
   }
 }
