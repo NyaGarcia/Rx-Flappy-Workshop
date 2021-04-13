@@ -1,6 +1,6 @@
 import * as PIXI from 'pixi.js';
 
-import { CANVAS_SIZE, SPRITE_URLS } from '../constants/game_config.constants';
+import { CANVAS_SIZE, SPRITE_URLS } from '../constants/game-config.constants';
 
 import { GameService } from '../services/game.service';
 import { Player } from '../models/player.model';
