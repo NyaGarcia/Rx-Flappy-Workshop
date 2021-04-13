@@ -3,6 +3,11 @@ export const CANVAS_SIZE = {
   WIDTH: 1000,
 } as const;
 
+export const KEYS = {
+  SPACE: 'Space',
+  UP: 'ArrowUp',
+};
+
 export const SPRITE_URLS = {
   PLAYER: {
     INITIAL: 'assets/sprites/player/sprite_0.png',
