@@ -6,8 +6,8 @@ import { filter } from 'rxjs/operators';
 export class GameService {
   private pressedKey$ = fromEvent<KeyboardEvent>(document, 'keydown');
 
-  /* TODO1 (hint: create a Subject that emits numbers) */
-  public onFrameUpdate$: Subject<number>;
+  /* Solution TODO1 */
+  public onFrameUpdate$ = new Subject<number>();
 
   public onFlap$ = this.pressedKey$.pipe(
     filter(({ code }) => code === KEYS.SPACE || code === KEYS.UP),
