@@ -26,6 +26,7 @@ export const PHYSICS = {
   PIPE_GENERATION_INTERVAL: 2500,
   GRAVITY: 0.15,
   FLAP_POWER: 5,
+  FLAP_DELAY: 150,
 } as const;
 
 export const PARAMS = {
