@@ -152,6 +152,9 @@ export class MainController {
   }
 
   private updateScore() {
-    // TODO 2: Update the scoreboard innerHTML with the score
+    // TODO 2 Solution
+    this.gameService.score$
+      .pipe(tap(score => (this.gui.scoreboard.innerHTML = `${score}`)))
+      .subscribe();
   }
 }
