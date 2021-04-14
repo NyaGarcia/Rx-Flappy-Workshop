@@ -1,7 +1,6 @@
 import { KEYS, PHYSICS } from '../constants/game-config.constants';
 import { Observable, Subject, fromEvent, interval, timer } from 'rxjs';
-
-import { filter } from 'rxjs/operators';
+import { filter, scan } from 'rxjs/operators';
 
 export class GameService {
   private pressedKey$ = fromEvent<KeyboardEvent>(document, 'keydown');
@@ -19,6 +18,8 @@ export class GameService {
     PHYSICS.PIPE_GENERATION_INTERVAL,
   );
 
-  // TODO 1 (hint: use scan + timer to accumulate the score)
-  public score$: Observable<number>;
+  // TODO 1 Solution
+  public score$ = timer(PHYSICS.SCORE_FIRST_WAIT, PHYSICS.PIPE_GENERATION_INTERVAL).pipe(
+    scan(score => score + 1, 0),
+  );
 }
