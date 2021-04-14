@@ -5,6 +5,7 @@ import { delay, tap } from 'rxjs/operators';
 
 import { GameService } from '../services/game.service';
 import { Player } from '../models/player.model';
+import { Skyline } from '../models/skyline.model';
 
 export class MainController {
   private app: PIXI.Application;
@@ -34,12 +35,12 @@ export class MainController {
     this.skylineContainer = new PIXI.Container();
     this.app.stage.addChild(this.skylineContainer);
 
-    // Solution TODO2
     this.app.ticker.add((delta: number) => this.gameService.onFrameUpdate$.next(delta));
   }
 
   private init() {
     this.setBackground();
+    this.renderSkyline();
     this.createPlayer();
     this.app.stage.setChildIndex(this.skylineContainer, 1);
   }
@@ -58,7 +59,6 @@ export class MainController {
     this.player = new Player();
     this.app.stage.addChild(this.player.sprite);
 
-    /* Solution TODO3 */
     this.gameService.onFrameUpdate$.subscribe(delta => this.player.setGravity(delta));
 
     this.gameService.onFlap$
@@ -68,5 +68,44 @@ export class MainController {
         tap(() => this.player.flap()),
       )
       .subscribe();
+  }
+
+  private renderSkyline(): void {
+    this.createInitialSkyline();
+
+    this.app.stage.setChildIndex(this.skylineContainer, 1);
+
+    // TODO 2 (hint: call createSkyline on every skyline update)
+  }
+
+  private createInitialSkyline() {
+    for (let i = 0; i < 3; i++) {
+      this.createSkylinePiece(i * 500);
+    }
+  }
+
+  private createSkyline(): void {
+    const lastSkyline = this.getLastSkyline();
+
+    if (lastSkyline.position.x <= CANVAS_SIZE.WIDTH) {
+      this.createSkylinePiece(lastSkyline.position.x + lastSkyline.width);
+    }
+  }
+
+  private getLastSkyline(): any {
+    const { children } = this.skylineContainer;
+
+    return children[children.length - 1];
+  }
+
+  private createSkylinePiece(x: number): void {
+    const skyline = new Skyline({
+      x,
+      y: CANVAS_SIZE.HEIGHT,
+    });
+
+    this.skylineContainer.addChild(skyline.sprite);
+
+    // TODO 3 (hint: update skyline position on every frame update)
   }
 }
