@@ -1,4 +1,4 @@
-import { Observable, Subject, fromEvent } from 'rxjs';
+import { Observable, Subject, fromEvent, interval } from 'rxjs';
 
 import { KEYS } from '../constants/game-config.constants';
 import { filter } from 'rxjs/operators';
@@ -12,6 +12,6 @@ export class GameService {
     filter(({ code }) => code === KEYS.SPACE || code === KEYS.UP),
   );
 
-  // TODO 1: (hint: create an Observable that emits every second)
-  public skylineUpdate$: Observable<number>;
+  // TODO 1 Solution
+  public skylineUpdate$ = interval(1000);
 }
