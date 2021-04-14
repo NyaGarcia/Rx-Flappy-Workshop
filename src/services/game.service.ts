@@ -1,4 +1,4 @@
-import { Observable, Subject, fromEvent, interval } from 'rxjs';
+import { Observable, Subject, fromEvent, interval, timer } from 'rxjs';
 
 import { KEYS } from '../constants/game-config.constants';
 import { filter } from 'rxjs/operators';
@@ -12,6 +12,9 @@ export class GameService {
     filter(({ code }) => code === KEYS.SPACE || code === KEYS.UP),
   );
 
-  // TODO 1 Solution
   public skylineUpdate$ = interval(1000);
+
+  /* TODO 1 (hint: create an observable that waits PHYSICS.PIPE_GENERATION_FIRST_WAIT seconds,
+     then starts emitting values every PHYSICS.PIPE_GENERATION_INTERVAL seconds) */
+  public createObstacle$: Observable<number>;
 }
