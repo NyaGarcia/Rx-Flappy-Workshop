@@ -8,12 +8,22 @@ import { Pipe } from '../models/pipe.model';
 import { Player } from '../models/player.model';
 import { Skyline } from '../models/skyline.model';
 
+interface GUI {
+  scoreboard: HTMLElement;
+  messages: HTMLElement;
+}
 export class MainController {
   private app: PIXI.Application;
   private skylineContainer: PIXI.Container;
   private player: Player;
+  private gui: GUI;
 
-  constructor(private view: Document, private gameService: GameService) {}
+  constructor(private view: Document, private gameService: GameService) {
+    this.gui = {
+      scoreboard: this.view.getElementById('scoreboard'),
+      messages: this.view.getElementById('messages'),
+    };
+  }
 
   public startGame() {
     this.setupPixi();
@@ -43,6 +53,7 @@ export class MainController {
     this.setBackground();
     this.renderSkyline();
     this.renderObstacles();
+    this.updateScore();
     this.createPlayer();
     this.app.stage.setChildIndex(this.skylineContainer, 1);
   }
@@ -112,7 +123,6 @@ export class MainController {
   }
 
   private renderObstacles() {
-    // TODO 2 Solution
     this.gameService.createObstacle$
       .pipe(
         tap(_ => this.createPipeSet()),
@@ -127,7 +137,7 @@ export class MainController {
 
     for (const pipe of [bottomPipe, topPipe]) {
       this.app.stage.addChild(pipe.sprite);
-      // TODO 3 Solution
+
       this.gameService.onFrameUpdate$.subscribe(delta => pipe.updatePosition(delta));
     }
   }
@@ -139,5 +149,9 @@ export class MainController {
       .filter(({ type }) => type === 'pipe')
       .filter(({ position }) => position.x < 0)
       .forEach(pipe => this.app.stage.removeChild(pipe));
+  }
+
+  private updateScore() {
+    // TODO 2: Update the scoreboard innerHTML with the score
   }
 }
