@@ -75,7 +75,8 @@ export class MainController {
 
     this.app.stage.setChildIndex(this.skylineContainer, 1);
 
-    // TODO 2 (hint: call createSkyline on every skyline update)
+    // TODO 2 Solution
+    this.gameService.skylineUpdate$.subscribe(_ => this.createSkyline());
   }
 
   private createInitialSkyline() {
@@ -106,6 +107,7 @@ export class MainController {
 
     this.skylineContainer.addChild(skyline.sprite);
 
-    // TODO 3 (hint: update skyline position on every frame update)
+    // TODO 3 Solution
+    this.gameService.onFrameUpdate$.subscribe(n => skyline.updatePosition(n));
   }
 }
