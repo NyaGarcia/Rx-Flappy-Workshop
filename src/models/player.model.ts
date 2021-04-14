@@ -11,9 +11,9 @@ export class Player {
 
   constructor() {
     this._sprite = Sprite.from(SPRITE_URLS.PLAYER.INITIAL);
-    this.sprite.anchor.set(0.5);
-    this.sprite.position.set(250, CANVAS_SIZE.HEIGHT / 2);
-    this.sprite.scale.set(5);
+    this._sprite.anchor.set(0.5);
+    this._sprite.position.set(250, CANVAS_SIZE.HEIGHT / 2);
+    this._sprite.scale.set(5);
   }
 
   public get sprite() {
