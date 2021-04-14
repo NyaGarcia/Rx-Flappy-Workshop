@@ -7,7 +7,7 @@ import { Sprite } from 'pixi.js';
 export class Player {
   private _sprite: Sprite;
   private ySpeed = 0;
-  private isFlapping = false;
+  private flapPosition = SPRITE_URLS.PLAYER.INITIAL;
 
   constructor() {
     this._sprite = Sprite.from(SPRITE_URLS.PLAYER.INITIAL);
@@ -26,8 +26,12 @@ export class Player {
   }
 
   public flap() {
-    const sprite = this.isFlapping ? SPRITE_URLS.PLAYER.INITIAL : SPRITE_URLS.PLAYER.FLAPPING;
-    const texture = PIXI.Texture.from(sprite);
-    this.sprite.texture = texture;
+    this.flapPosition = this.nextFlapPosition();
+    this.sprite.texture = PIXI.Texture.from(this.flapPosition);
+  }
+
+  private nextFlapPosition(): string {
+    const isFlapping = this.flapPosition === SPRITE_URLS.PLAYER.FLAPPING;
+    return isFlapping ? SPRITE_URLS.PLAYER.INITIAL : SPRITE_URLS.PLAYER.FLAPPING;
   }
 }
