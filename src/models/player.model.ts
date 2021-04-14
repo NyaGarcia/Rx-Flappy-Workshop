@@ -25,8 +25,8 @@ export class Player {
   }
 
   public flap() {
-    this.sprite.texture = PIXI.Texture.from(this.flapPosition);
     this.flapPosition = this.nextFlapPosition();
+    this.sprite.texture = PIXI.Texture.from(this.flapPosition);
   }
 
   private nextFlapPosition(): string {
