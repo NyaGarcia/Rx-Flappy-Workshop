@@ -4,6 +4,7 @@ import { CANVAS_SIZE, PHYSICS, SPRITE_URLS } from '../constants/game-config.cons
 import { delay, tap } from 'rxjs/operators';
 
 import { GameService } from '../services/game.service';
+import { Pipe } from '../models/pipe.model';
 import { Player } from '../models/player.model';
 import { Skyline } from '../models/skyline.model';
 
@@ -41,6 +42,7 @@ export class MainController {
   private init() {
     this.setBackground();
     this.renderSkyline();
+    this.renderObstacles();
     this.createPlayer();
     this.app.stage.setChildIndex(this.skylineContainer, 1);
   }
@@ -75,7 +77,6 @@ export class MainController {
 
     this.app.stage.setChildIndex(this.skylineContainer, 1);
 
-    // TODO 2 Solution
     this.gameService.skylineUpdate$.subscribe(_ => this.createSkyline());
   }
 
@@ -107,7 +108,29 @@ export class MainController {
 
     this.skylineContainer.addChild(skyline.sprite);
 
-    // TODO 3 Solution
     this.gameService.onFrameUpdate$.subscribe(n => skyline.updatePosition(n));
+  }
+
+  private renderObstacles() {
+    // TODO 2 (hint: call createPipeSet and deleteOldPipes every createObstacle interval)
+  }
+
+  private createPipeSet(): void {
+    const bottomPipe = new Pipe();
+    const topPipe = new Pipe(bottomPipe);
+
+    for (const pipe of [bottomPipe, topPipe]) {
+      this.app.stage.addChild(pipe.sprite);
+      // TODO 3 (hint: update the pipe position every frame update)
+    }
+  }
+
+  private deleteOldPipes(): void {
+    const children = this.app.stage.children as any[];
+    children
+      .filter(Boolean)
+      .filter(({ type }) => type === 'pipe')
+      .filter(({ position }) => position.x < 0)
+      .forEach(pipe => this.app.stage.removeChild(pipe));
   }
 }
