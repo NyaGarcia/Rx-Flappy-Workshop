@@ -1,10 +1,10 @@
 import { KEYS, PHYSICS } from '../constants/game-config.constants';
 import { Observable, Subject, fromEvent, interval, timer } from 'rxjs';
-import { filter, scan, takeUntil, tap } from 'rxjs/operators';
+import { filter, scan } from 'rxjs/operators';
 
 export class GameService {
   // TODO 1 (hint: create Subject)
-  private stopGame$ = new Subject<void>();
+  private stopGame$: Subject<void>;
 
   private pressedKey$ = fromEvent<KeyboardEvent>(document, 'keydown');
 
