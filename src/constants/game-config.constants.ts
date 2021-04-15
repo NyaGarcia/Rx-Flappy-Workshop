@@ -3,6 +3,10 @@ export const CANVAS_SIZE = {
   WIDTH: 1000,
 };
 
+export const MESSAGES = {
+  EASTER_EGG: 'Wow, so much power!',
+};
+
 export const BOUNDS = {
   TOP: -60,
   BOTTOM: CANVAS_SIZE.HEIGHT + 30,
