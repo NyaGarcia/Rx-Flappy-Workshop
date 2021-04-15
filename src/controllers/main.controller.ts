@@ -1,7 +1,7 @@
 import * as PIXI from 'pixi.js';
 
 import { BOUNDS, CANVAS_SIZE, PHYSICS, SPRITE_URLS } from '../constants/game-config.constants';
-import { delay, tap } from 'rxjs/operators';
+import { delay, first, tap } from 'rxjs/operators';
 
 import { GameService } from '../services/game.service';
 import { Pipe } from '../models/pipe.model';
@@ -57,7 +57,6 @@ export class MainController {
   }
 
   private init() {
-    console.log('RESTARTING');
     this.setBackground();
     this.renderSkyline();
     this.renderObstacles();
@@ -81,8 +80,10 @@ export class MainController {
     this.player = new Player();
     this.app.stage.addChild(this.player.sprite);
 
-    // TODO 5 (hint: check player's bounds)
-    this.gameService.onFrameUpdate$.pipe().subscribe(delta => this.player.setGravity(delta));
+    // TODO 5 Solution
+    this.gameService.onFrameUpdate$
+      .pipe(tap(_ => this.checkBounds()))
+      .subscribe(delta => this.player.setGravity(delta));
 
     this.gameService.onFlap$
       .pipe(
@@ -188,13 +189,19 @@ export class MainController {
   private gameOver() {
     this.player.killKiwi();
 
-    // TODO 4 (hint: make the stopGame$ subject emit)
+    // TODO 4 Solution
     this.gameService.stopGame();
 
     this.renderGameOverMessage();
 
-    // TODO 7 (hint: call destroy and startGame when restart$ emits its first value)
-    this.gameService.restart$.pipe().subscribe();
+    // TODO 7 Solution
+    this.gameService.restart$
+      .pipe(
+        first(),
+        tap(_ => this.destroy()),
+        tap(_ => this.startGame()),
+      )
+      .subscribe();
   }
 
   private renderGameOverMessage() {
