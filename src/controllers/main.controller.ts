@@ -1,6 +1,6 @@
 import * as PIXI from 'pixi.js';
 
-import { CANVAS_SIZE, PHYSICS, SPRITE_URLS } from '../constants/game-config.constants';
+import { BOUNDS, CANVAS_SIZE, PHYSICS, SPRITE_URLS } from '../constants/game-config.constants';
 import { delay, tap } from 'rxjs/operators';
 
 import { GameService } from '../services/game.service';
@@ -8,6 +8,7 @@ import { Pipe } from '../models/pipe.model';
 import { Player } from '../models/player.model';
 import { Skyline } from '../models/skyline.model';
 
+declare var Bump: any;
 interface GUI {
   scoreboard: HTMLElement;
   messages: HTMLElement;
@@ -17,6 +18,7 @@ export class MainController {
   private skylineContainer: PIXI.Container;
   private player: Player;
   private gui: GUI;
+  private bump: any;
 
   constructor(private view: Document, private gameService: GameService) {
     this.gui = {
@@ -27,6 +29,7 @@ export class MainController {
 
   public startGame() {
     this.setupPixi();
+    this.setupBump();
     this.init();
   }
 
@@ -49,12 +52,18 @@ export class MainController {
     this.app.ticker.add((delta: number) => this.gameService.onFrameUpdate$.next(delta));
   }
 
+  private setupBump() {
+    this.bump = new Bump(PIXI);
+  }
+
   private init() {
+    console.log('RESTARTING');
     this.setBackground();
     this.renderSkyline();
     this.renderObstacles();
     this.updateScore();
     this.createPlayer();
+    this.addCollisions();
     this.app.stage.setChildIndex(this.skylineContainer, 1);
   }
 
@@ -72,7 +81,8 @@ export class MainController {
     this.player = new Player();
     this.app.stage.addChild(this.player.sprite);
 
-    this.gameService.onFrameUpdate$.subscribe(delta => this.player.setGravity(delta));
+    // TODO 5 (hint: check player's bounds)
+    this.gameService.onFrameUpdate$.pipe().subscribe(delta => this.player.setGravity(delta));
 
     this.gameService.onFlap$
       .pipe(
@@ -152,9 +162,66 @@ export class MainController {
   }
 
   private updateScore() {
-    // TODO 2 Solution
     this.gameService.score$
       .pipe(tap(score => (this.gui.scoreboard.innerHTML = `${score}`)))
       .subscribe();
+  }
+
+  private addCollisions(): void {
+    this.gameService.onFrameUpdate$.subscribe(() => this.checkCollisions());
+  }
+
+  private checkCollisions(): void {
+    const { children }: { children: any[] } = this.app.stage;
+
+    if (this.hasCollided(children)) {
+      this.gameOver();
+    }
+  }
+
+  private hasCollided(children: any[]) {
+    return children
+      .filter(({ type }) => type === 'pipe')
+      .some(pipe => this.bump.hit(this.player.sprite, pipe));
+  }
+
+  private gameOver() {
+    this.player.killKiwi();
+
+    // TODO 4 (hint: make the stopGame$ subject emit)
+    this.gameService.stopGame();
+
+    this.renderGameOverMessage();
+
+    // TODO 7 (hint: call destroy and startGame when restart$ emits its first value)
+    this.gameService.restart$.pipe().subscribe();
+  }
+
+  private renderGameOverMessage() {
+    const gameOverSprite = PIXI.Sprite.from(SPRITE_URLS.GAME_OVER_TEXT);
+
+    gameOverSprite.anchor.set(0.5);
+    gameOverSprite.position.set(CANVAS_SIZE.WIDTH / 2, CANVAS_SIZE.HEIGHT / 3);
+    gameOverSprite.scale.set(0.6);
+
+    this.app.stage.addChild(gameOverSprite);
+  }
+
+  private destroy() {
+    this.app.destroy(true, {
+      texture: true,
+      children: true,
+      baseTexture: true,
+    });
+  }
+
+  private checkBounds() {
+    if (this.isOutOfBounds(this.player.sprite.position.y)) {
+      this.gameOver();
+    }
+  }
+
+  private isOutOfBounds(playerHeight: number) {
+    return playerHeight > BOUNDS.BOTTOM || playerHeight < BOUNDS.TOP;
   }
 }
