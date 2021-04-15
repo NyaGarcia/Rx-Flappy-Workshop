@@ -3,6 +3,11 @@ export const CANVAS_SIZE = {
   WIDTH: 1000,
 };
 
+export const BOUNDS = {
+  TOP: -60,
+  BOTTOM: CANVAS_SIZE.HEIGHT + 30,
+};
+
 export const KEYS = {
   SPACE: 'Space',
   UP: 'ArrowUp',
@@ -16,7 +21,7 @@ export const SPRITE_URLS = {
   PIPE: 'assets/sprites/pipe.png',
   IMAGE_BACKGROUND: 'assets/backgrounds/background.jpg',
   SKYLINE: 'assets/backgrounds/skyline.png',
-  GAME_OVER_TEXT: 'assets/sprites/game-over.png',
+  GAME_OVER_TEXT: 'assets/sprites/gameover.png',
 };
 
 export const PHYSICS = {
