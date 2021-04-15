@@ -63,6 +63,7 @@ export class MainController {
     this.updateScore();
     this.createPlayer();
     this.addCollisions();
+    this.setEasterEgg();
     this.app.stage.setChildIndex(this.skylineContainer, 1);
   }
 
@@ -80,7 +81,6 @@ export class MainController {
     this.player = new Player();
     this.app.stage.addChild(this.player.sprite);
 
-    // TODO 5 Solution
     this.gameService.onFrameUpdate$
       .pipe(tap(_ => this.checkBounds()))
       .subscribe(delta => this.player.setGravity(delta));
@@ -189,12 +189,10 @@ export class MainController {
   private gameOver() {
     this.player.killKiwi();
 
-    // TODO 4 Solution
     this.gameService.stopGame();
 
     this.renderGameOverMessage();
 
-    // TODO 7 Solution
     this.gameService.restart$
       .pipe(
         first(),
@@ -230,5 +228,10 @@ export class MainController {
 
   private isOutOfBounds(playerHeight: number) {
     return playerHeight > BOUNDS.BOTTOM || playerHeight < BOUNDS.TOP;
+  }
+
+  private setEasterEgg() {
+    // TODO 2 (hint: display easter egg message)
+    this.gameService.easterEgg$.pipe().subscribe();
   }
 }
