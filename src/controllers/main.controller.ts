@@ -1,6 +1,12 @@
 import * as PIXI from 'pixi.js';
 
-import { BOUNDS, CANVAS_SIZE, PHYSICS, SPRITE_URLS } from '../constants/game-config.constants';
+import {
+  BOUNDS,
+  CANVAS_SIZE,
+  MESSAGES,
+  PHYSICS,
+  SPRITE_URLS,
+} from '../constants/game-config.constants';
 import { delay, first, tap } from 'rxjs/operators';
 
 import { GameService } from '../services/game.service';
@@ -231,7 +237,9 @@ export class MainController {
   }
 
   private setEasterEgg() {
-    // TODO 2 (hint: display easter egg message)
-    this.gameService.easterEgg$.pipe().subscribe();
+    // TODO 2 Solution
+    this.gameService.easterEgg$
+      .pipe(tap(_ => (this.gui.messages.innerHTML = MESSAGES.EASTER_EGG)))
+      .subscribe();
   }
 }
