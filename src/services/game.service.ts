@@ -1,6 +1,6 @@
 import { KEYS, PHYSICS } from '../constants/game-config.constants';
-import { Observable, Subject, fromEvent, interval, timer } from 'rxjs';
-import { filter, scan, takeUntil } from 'rxjs/operators';
+import { Subject, fromEvent, interval, timer } from 'rxjs';
+import { bufferTime, filter, scan, takeUntil } from 'rxjs/operators';
 
 export class GameService {
   private stopGame$ = new Subject<void>();
@@ -32,6 +32,10 @@ export class GameService {
 
   public restart$ = this.pressedKey$.pipe(filter(({ code }) => code === KEYS.SPACE));
 
-  // TODO 1 (hint: create an Observable that emits if keys are pressed more than 6 times in 1s)
-  public easterEgg$: Observable<KeyboardEvent[]>;
+  // TODO 1 Solution
+  public easterEgg$ = this.pressedKey$.pipe(
+    bufferTime(1000),
+    filter(({ length }) => length > 6),
+    takeUntil(this.stopGame$),
+  );
 }
