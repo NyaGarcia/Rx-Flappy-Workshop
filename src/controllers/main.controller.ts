@@ -204,6 +204,7 @@ export class MainController {
     // TODO 4 (hint: make the stopGame$ subject emit)
 
     this.renderGameOverMessage();
+    this.resetScore();
 
     // TODO 8 (hint: call destroy and startGame when restart$ emits its first value)
     this.gameService.restart$.pipe().subscribe();
@@ -217,6 +218,10 @@ export class MainController {
     gameOverSprite.scale.set(0.6);
 
     this.app.stage.addChild(gameOverSprite);
+  }
+
+  private resetScore() {
+    this.gui.scoreboard.innerHTML = `0`;
   }
 
   private destroy() {
