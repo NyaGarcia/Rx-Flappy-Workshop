@@ -245,10 +245,14 @@ export class MainController {
     // TODO 2 Solution
     this.gameService.easterEgg$
       .pipe(
-        tap(() => (this.gui.messages.innerHTML = MESSAGES.EASTER_EGG)),
+        tap(() => this.setMessage(MESSAGES.EASTER_EGG)),
         delay(3000),
-        tap(() => (this.gui.messages.innerHTML = '')),
+        tap(() => this.setMessage()),
       )
       .subscribe();
+  }
+
+  private setMessage(message: string = '') {
+    this.gui.messages.innerHTML = message;
   }
 }
