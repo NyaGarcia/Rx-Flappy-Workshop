@@ -8,16 +8,17 @@
     <!-- build:js scripts/combined.js -->
     <script src="libs/bump.js"></script>
     <!-- endbuild -->
-    <title>Kiwi bird!</title>
+    <title>Kiwi Bird</title>
   </head>
   <body>
-    Project link:
-    <!-- <a
-      href="https://git.qontu.com/egarcia/KiwiBird"
-      style="background: rgba(0,0,0,0.7)"
-      >https://git.qontu.com/egarcia/KiwiBird</a
-    > -->
-    <h5>The awesome KIWI bird</h5>
+    <div class="toolbar">
+      <span class="title">The Awesome Kiwi Bird</span>
+      <span class="score" id="scoreboard">
+        0
+      </span>
+    </div>
+    <div class="canvas-container" id="canvasContainer"></div>
+    <div id="messages"></div>
   </body>
   <script src="bundle.js"></script>
 </html>
