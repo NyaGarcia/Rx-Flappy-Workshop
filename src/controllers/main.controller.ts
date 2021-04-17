@@ -4,6 +4,7 @@ import {
   BOUNDS,
   CANVAS_SIZE,
   MESSAGES,
+  PARAMS,
   PHYSICS,
   SPRITE_URLS,
 } from '../constants/game-config.constants';
@@ -213,6 +214,7 @@ export class MainController {
     this.gameService.stopGame();
 
     this.renderGameOverMessage();
+    this.resetScore();
 
     this.gameService.restart$
       .pipe(
@@ -233,6 +235,10 @@ export class MainController {
     this.app.stage.addChild(gameOverSprite);
   }
 
+  private resetScore() {
+    this.gui.scoreboard.innerHTML = `0`;
+  }
+
   private destroy() {
     this.app.destroy(true, {
       texture: true,
@@ -245,14 +251,14 @@ export class MainController {
     // TODO 2 Solution
     this.gameService.easterEgg$
       .pipe(
-        tap(() => this.setMessage(MESSAGES.EASTER_EGG)),
-        delay(3000),
-        tap(() => this.setMessage()),
+        tap(() => this.setEasterEggMessage(MESSAGES.EASTER_EGG)),
+        delay(PARAMS.EASTER_EGG_DURATION),
+        tap(() => this.setEasterEggMessage()),
       )
       .subscribe();
   }
 
-  private setMessage(message: string = '') {
+  private setEasterEggMessage(message: string = '') {
     this.gui.messages.innerHTML = message;
   }
 }

@@ -41,4 +41,5 @@ export const PHYSICS = {
 
 export const PARAMS = {
   VERTICAL_PIPES_SEPARATION: 1000,
+  EASTER_EGG_DURATION: 3000,
 };
