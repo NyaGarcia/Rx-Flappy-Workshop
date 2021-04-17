@@ -49,7 +49,7 @@ export class MainController {
 
     // Ticker is used to game-loop
     this.app.ticker.add((delta: number) => {
-      // TODO2 (hint: Pass the delta value to onFrameUpdate$)
+      // TODO 2 (hint: Pass the delta value to onFrameUpdate$)
     });
   }
 
