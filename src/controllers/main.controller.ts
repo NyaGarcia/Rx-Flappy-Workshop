@@ -90,8 +90,11 @@ export class MainController {
     this.app.stage.addChild(this.player.sprite);
 
     this.gameService.onFrameUpdate$
-      .pipe(tap(_ => this.checkBounds()))
-      .subscribe(delta => this.player.setGravity(delta));
+      .pipe(
+        tap(delta => this.player.setGravity(delta)),
+        tap(_ => this.checkBounds()),
+      )
+      .subscribe();
 
     this.gameService.onFlap$
       .pipe(
@@ -107,7 +110,7 @@ export class MainController {
 
     this.app.stage.setChildIndex(this.skylineContainer, 1);
 
-    this.gameService.skylineUpdate$.subscribe(_ => this.createSkyline());
+    this.gameService.skylineUpdate$.pipe(tap(_ => this.createSkyline())).subscribe();
   }
 
   private createInitialSkyline() {
@@ -138,7 +141,7 @@ export class MainController {
 
     this.skylineContainer.addChild(skyline.sprite);
 
-    this.gameService.onFrameUpdate$.subscribe(n => skyline.updatePosition(n));
+    this.gameService.onFrameUpdate$.pipe(tap(n => skyline.updatePosition(n))).subscribe();
   }
 
   private renderObstacles() {
@@ -157,7 +160,7 @@ export class MainController {
     for (const pipe of [bottomPipe, topPipe]) {
       this.app.stage.addChild(pipe.sprite);
 
-      this.gameService.onFrameUpdate$.subscribe(delta => pipe.updatePosition(delta));
+      this.gameService.onFrameUpdate$.pipe(tap(delta => pipe.updatePosition(delta))).subscribe();
     }
   }
 
@@ -177,7 +180,7 @@ export class MainController {
   }
 
   private addCollisions(): void {
-    this.gameService.onFrameUpdate$.subscribe(() => this.checkCollisions());
+    this.gameService.onFrameUpdate$.pipe(tap(() => this.checkCollisions())).subscribe();
   }
 
   private checkCollisions(): void {
