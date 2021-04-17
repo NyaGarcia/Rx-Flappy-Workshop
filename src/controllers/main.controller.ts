@@ -66,6 +66,7 @@ export class MainController {
     this.updateScore();
     this.createPlayer();
     this.addCollisions();
+    this.addBoundsCheck();
     this.app.stage.setChildIndex(this.skylineContainer, 1);
   }
 
@@ -82,8 +83,6 @@ export class MainController {
   private createPlayer() {
     this.player = new Player();
     this.app.stage.addChild(this.player.sprite);
-
-    this.gameService.onFrameUpdate$.pipe(tap(delta => this.player.setGravity(delta))).subscribe();
 
     this.gameService.onFlap$
       .pipe(
@@ -169,7 +168,8 @@ export class MainController {
   }
 
   private addCollisions(): void {
-    this.gameService.onFrameUpdate$.pipe(tap(() => this.checkCollisions())).subscribe();
+    //TODO 6 (hint: check collisions on every frame update)
+    this.gameService.onFrameUpdate$.pipe().subscribe();
   }
 
   private checkCollisions(): void {
@@ -186,15 +186,24 @@ export class MainController {
       .some(pipe => this.bump.hit(this.player.sprite, pipe));
   }
 
+  private addBoundsCheck() {
+    //TODO 5 (hint: call gameOver if player is out of bounds)
+    this.gameService.onFrameUpdate$.pipe().subscribe();
+  }
+
+  private isPlayerOutOfBounds() {
+    const playerHeight = this.player.position.y;
+    return playerHeight > BOUNDS.BOTTOM || playerHeight < BOUNDS.TOP;
+  }
+
   private gameOver() {
     this.player.killKiwi();
 
     // TODO 4 (hint: make the stopGame$ subject emit)
-    this.gameService.stopGame();
 
     this.renderGameOverMessage();
 
-    // TODO 7 (hint: call destroy and startGame when restart$ emits its first value)
+    // TODO 8 (hint: call destroy and startGame when restart$ emits its first value)
     this.gameService.restart$.pipe().subscribe();
   }
 

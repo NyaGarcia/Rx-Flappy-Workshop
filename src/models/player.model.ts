@@ -20,6 +20,10 @@ export class Player {
     return this._sprite;
   }
 
+  public get position() {
+    return this._sprite.position;
+  }
+
   public killKiwi() {
     this.sprite.rotation = 180;
   }

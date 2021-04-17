@@ -34,6 +34,6 @@ export class GameService {
     // TODO 2 (hint: make stopGame$ emit)
   }
 
-  // TODO 6 (hint: create an Observable that emits ONLY when space is pressed)
+  // TODO 7 (hint: create an Observable that emits ONLY when space is pressed)
   public restart$: Observable<KeyboardEvent>;
 }
