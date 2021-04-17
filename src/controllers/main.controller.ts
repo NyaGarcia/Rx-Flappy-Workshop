@@ -169,7 +169,7 @@ export class MainController {
   }
 
   private addCollisions(): void {
-    this.gameService.onFrameUpdate$.subscribe(() => this.checkCollisions());
+    this.gameService.onFrameUpdate$.pipe(tap(() => this.checkCollisions())).subscribe();
   }
 
   private checkCollisions(): void {
