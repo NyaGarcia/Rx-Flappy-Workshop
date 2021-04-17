@@ -83,6 +83,8 @@ export class MainController {
     this.player = new Player();
     this.app.stage.addChild(this.player.sprite);
 
+    this.gameService.onFrameUpdate$.pipe(tap(delta => this.player.setGravity(delta))).subscribe();
+
     this.gameService.onFlap$
       .pipe(
         tap(() => this.player.flap()),
