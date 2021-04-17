@@ -141,7 +141,7 @@ export class MainController {
     for (const pipe of [bottomPipe, topPipe]) {
       this.app.stage.addChild(pipe.sprite);
       // TODO 3 Solution
-      this.gameService.onFrameUpdate$.subscribe(delta => pipe.updatePosition(delta));
+      this.gameService.onFrameUpdate$.pipe(tap(delta => pipe.updatePosition(delta))).subscribe();
     }
   }
 
