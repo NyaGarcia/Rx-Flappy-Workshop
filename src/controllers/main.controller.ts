@@ -241,7 +241,11 @@ export class MainController {
   }
 
   private setEasterEgg() {
-    // TODO 2 (hint: display easter egg message)
+    // TODO 2 (hint: display easter egg message during EASTER_EGG_DURATION)
     this.gameService.easterEgg$.pipe().subscribe();
+  }
+
+  private setEasterEggMessage(message: string = '') {
+    this.gui.messages.innerHTML = message;
   }
 }
