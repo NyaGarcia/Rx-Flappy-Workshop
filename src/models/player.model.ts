@@ -24,14 +24,13 @@ export class Player {
     this.sprite.rotation = 180;
   }
 
-  // New method
   public setGravity(delta: number): void {
     this.ySpeed += PHYSICS.GRAVITY * delta;
     this.sprite.position.y += this.ySpeed;
   }
 
   public flap() {
-    this.ySpeed = -PHYSICS.FLAP_POWER; // New line (gravity)
+    this.ySpeed = -PHYSICS.FLAP_POWER;
     this.flapPosition = this.nextFlapPosition();
     this.sprite.texture = PIXI.Texture.from(this.flapPosition);
   }
