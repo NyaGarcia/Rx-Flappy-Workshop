@@ -26,7 +26,7 @@ gulp.task('html', function() {
 
 gulp.task('css', function() {
   return gulp
-    .src('src/**/*.css')
+    .src('src/assets/css/*.css')
     .pipe(minifyCSS())
     .pipe(autoprefixer('last 2 version', 'safari 5', 'ie 8', 'ie 9'))
     .pipe(concat('style.min.css'))
@@ -65,7 +65,11 @@ gulp.task('browserify', function() {
     .pipe(reload());
 });
 
+gulp.task('fonts', function() {
+  return gulp.src(['src/assets/fonts/*.ttf']).pipe(gulp.dest('dist/assets/fonts'));
+});
+
 gulp.task(
   'default',
-  gulp.series(['browserify', 'html', 'css', 'images', gulp.parallel('serve', 'watch')]),
+  gulp.series(['browserify', 'html', 'css', 'images', 'fonts', gulp.parallel('serve', 'watch')]),
 );

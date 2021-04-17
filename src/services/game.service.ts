@@ -6,7 +6,7 @@ import { filter } from 'rxjs/operators';
 export class GameService {
   private pressedKey$ = fromEvent<KeyboardEvent>(document, 'keydown');
 
-  /* Solution TODO1 */
+  /* TODO 1 Solution */
   public onFrameUpdate$ = new Subject<number>();
 
   public onFlap$ = this.pressedKey$.pipe(
