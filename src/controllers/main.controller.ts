@@ -6,12 +6,25 @@ import { delay, tap } from 'rxjs/operators';
 import { GameService } from '../services/game.service';
 import { Player } from '../models/player.model';
 
+declare var Bump: any;
+interface GUI {
+  canvasContainer: HTMLElement;
+  scoreboard: HTMLElement;
+  messages: HTMLElement;
+}
 export class MainController {
+  private gui: GUI;
   private app: PIXI.Application;
   private skylineContainer: PIXI.Container;
   private player: Player;
 
-  constructor(private view: Document, private gameService: GameService) {}
+  constructor(private view: Document, private gameService: GameService) {
+    this.gui = {
+      canvasContainer: this.view.getElementById('canvasContainer'),
+      scoreboard: this.view.getElementById('scoreboard'),
+      messages: this.view.getElementById('messages'),
+    };
+  }
 
   public startGame() {
     this.setupPixi();
@@ -29,7 +42,7 @@ export class MainController {
       backgroundColor: 0x1099bb,
     });
 
-    this.view.body.appendChild(this.app.view);
+    this.gui.canvasContainer.appendChild(this.app.view);
 
     this.skylineContainer = new PIXI.Container();
     this.app.stage.addChild(this.skylineContainer);
