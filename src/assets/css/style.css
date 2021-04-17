@@ -22,6 +22,13 @@ canvas {
   border-radius: 10px;
 }
 
+h2 {
+  color: #fff;
+  font-family: Flappy;
+  font-size: 50px;
+  text-align: center;
+}
+
 span {
   color: #fff;
   font-size: 30px;
