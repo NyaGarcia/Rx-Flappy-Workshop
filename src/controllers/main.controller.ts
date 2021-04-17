@@ -1,7 +1,7 @@
 import * as PIXI from 'pixi.js';
 
 import { BOUNDS, CANVAS_SIZE, PHYSICS, SPRITE_URLS } from '../constants/game-config.constants';
-import { delay, first, tap } from 'rxjs/operators';
+import { delay, filter, first, tap } from 'rxjs/operators';
 
 import { GameService } from '../services/game.service';
 import { Pipe } from '../models/pipe.model';
@@ -65,6 +65,7 @@ export class MainController {
     this.updateScore();
     this.createPlayer();
     this.addCollisions();
+    this.addBoundsCheck();
     this.app.stage.setChildIndex(this.skylineContainer, 1);
   }
 
@@ -82,13 +83,7 @@ export class MainController {
     this.player = new Player();
     this.app.stage.addChild(this.player.sprite);
 
-    // TODO 5 Solution
-    this.gameService.onFrameUpdate$
-      .pipe(
-        tap(delta => this.player.setGravity(delta)),
-        tap(_ => this.checkBounds()),
-      )
-      .subscribe();
+    this.gameService.onFrameUpdate$.pipe(tap(delta => this.player.setGravity(delta))).subscribe();
 
     this.gameService.onFlap$
       .pipe(
@@ -174,6 +169,7 @@ export class MainController {
   }
 
   private addCollisions(): void {
+    // TODO 6 Solution
     this.gameService.onFrameUpdate$.pipe(tap(() => this.checkCollisions())).subscribe();
   }
 
@@ -191,6 +187,21 @@ export class MainController {
       .some(pipe => this.bump.hit(this.player.sprite, pipe));
   }
 
+  private addBoundsCheck() {
+    // TODO 5 Solution
+    this.gameService.onFrameUpdate$
+      .pipe(
+        filter(() => this.isPlayerOutOfBounds()),
+        tap(() => this.gameOver()),
+      )
+      .subscribe();
+  }
+
+  private isPlayerOutOfBounds() {
+    const playerHeight = this.player.position.y;
+    return playerHeight > BOUNDS.BOTTOM || playerHeight < BOUNDS.TOP;
+  }
+
   private gameOver() {
     this.player.killKiwi();
 
@@ -199,12 +210,12 @@ export class MainController {
 
     this.renderGameOverMessage();
 
-    // TODO 7 Solution
+    // TODO 8 Solution
     this.gameService.restart$
       .pipe(
         first(),
-        tap(_ => this.destroy()),
-        tap(_ => this.startGame()),
+        tap(() => this.destroy()),
+        tap(() => this.startGame()),
       )
       .subscribe();
   }
@@ -225,15 +236,5 @@ export class MainController {
       children: true,
       baseTexture: true,
     });
-  }
-
-  private checkBounds() {
-    if (this.isOutOfBounds(this.player.sprite.position.y)) {
-      this.gameOver();
-    }
-  }
-
-  private isOutOfBounds(playerHeight: number) {
-    return playerHeight > BOUNDS.BOTTOM || playerHeight < BOUNDS.TOP;
   }
 }
