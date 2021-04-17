@@ -12,6 +12,6 @@ export class GameService {
     filter(({ code }) => code === KEYS.SPACE || code === KEYS.UP),
   );
 
-  // TODO 1: (hint: create an Observable that emits every second)
+  // TODO 1 (hint: create an Observable that emits every second)
   public skylineUpdate$: Observable<number>;
 }
