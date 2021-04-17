@@ -32,10 +32,11 @@ export class GameService {
     takeUntil(this.stopGame$),
   );
 
+  // TODO 2 Solution
   public stopGame() {
     this.stopGame$.next();
   }
 
-  // TODO 6 Solution
+  // TODO 7 Solution
   public restart$ = this.pressedKey$.pipe(filter(({ code }) => code === KEYS.SPACE));
 }
