@@ -226,14 +226,4 @@ export class MainController {
       baseTexture: true,
     });
   }
-
-  private checkBounds() {
-    if (this.isOutOfBounds(this.player.sprite.position.y)) {
-      this.gameOver();
-    }
-  }
-
-  private isOutOfBounds(playerHeight: number) {
-    return playerHeight > BOUNDS.BOTTOM || playerHeight < BOUNDS.TOP;
-  }
 }
