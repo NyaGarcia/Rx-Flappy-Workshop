@@ -207,6 +207,7 @@ export class MainController {
     this.gameService.stopGame();
 
     this.renderGameOverMessage();
+    this.resetScore();
 
     this.gameService.restart$
       .pipe(
@@ -225,6 +226,10 @@ export class MainController {
     gameOverSprite.scale.set(0.6);
 
     this.app.stage.addChild(gameOverSprite);
+  }
+
+  private resetScore() {
+    this.gui.scoreboard.innerHTML = `0`;
   }
 
   private destroy() {
