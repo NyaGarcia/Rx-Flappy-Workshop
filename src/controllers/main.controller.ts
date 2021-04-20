@@ -169,7 +169,6 @@ export class MainController {
   }
 
   private addCollisions(): void {
-    // TODO 6 Solution
     this.gameService.onFrameUpdate$
       .pipe(
         filter(() => this.checkCollisions()),
