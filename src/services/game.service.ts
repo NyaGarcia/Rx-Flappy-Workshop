@@ -1,4 +1,4 @@
-import { KEYS, PHYSICS } from '../constants/game-config.constants';
+import { KEYS, PARAMS, PHYSICS } from '../constants/game-config.constants';
 import { Subject, fromEvent, interval, timer } from 'rxjs';
 import { bufferTime, filter, scan, takeUntil } from 'rxjs/operators';
 
@@ -34,7 +34,7 @@ export class GameService {
 
   // TODO 1 Solution
   public easterEgg$ = this.pressedKey$.pipe(
-    bufferTime(1000),
+    bufferTime(PARAMS.EASTER_EGG_BUFFER_TIME),
     filter(({ length }) => length > 6),
     takeUntil(this.stopGame$),
   );
