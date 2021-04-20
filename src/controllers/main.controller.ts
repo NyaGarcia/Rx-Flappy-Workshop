@@ -104,7 +104,7 @@ export class MainController {
     }
   }
 
-  private getLastSkyline(): any {
+  private getLastSkyline() {
     const { children } = this.skylineContainer;
 
     return children[children.length - 1];
