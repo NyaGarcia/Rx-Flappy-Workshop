@@ -89,7 +89,7 @@ export class MainController {
 
     this.app.stage.setChildIndex(this.skylineContainer, 1);
 
-    this.gameService.skylineUpdate$.pipe(tap(_ => this.createSkyline())).subscribe();
+    this.gameService.skylineUpdate$.pipe(tap(() => this.createSkyline())).subscribe();
   }
 
   private createInitialSkyline() {
@@ -127,8 +127,8 @@ export class MainController {
     // TODO 2 Solution
     this.gameService.createObstacle$
       .pipe(
-        tap(_ => this.createPipeSet()),
-        tap(_ => this.deleteOldPipes()),
+        tap(() => this.createPipeSet()),
+        tap(() => this.deleteOldPipes()),
       )
       .subscribe();
   }
