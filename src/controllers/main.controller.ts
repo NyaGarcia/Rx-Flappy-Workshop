@@ -8,7 +8,6 @@ import { Pipe } from '../models/pipe.model';
 import { Player } from '../models/player.model';
 import { Skyline } from '../models/skyline.model';
 
-declare var Bump: any;
 interface GUI {
   canvasContainer: HTMLElement;
   scoreboard: HTMLElement;
@@ -117,7 +116,7 @@ export class MainController {
     }
   }
 
-  private getLastSkyline(): any {
+  private getLastSkyline() {
     const { children } = this.skylineContainer;
 
     return children[children.length - 1];
@@ -155,7 +154,7 @@ export class MainController {
   }
 
   private deleteOldPipes(): void {
-    const children = this.app.stage.children as any[];
+    const children = this.app.stage.children;
     children
       .filter(Boolean)
       .filter(({ type }) => type === 'pipe')
