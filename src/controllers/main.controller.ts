@@ -6,7 +6,6 @@ import { delay, tap } from 'rxjs/operators';
 import { GameService } from '../services/game.service';
 import { Player } from '../models/player.model';
 
-declare var Bump: any;
 interface GUI {
   canvasContainer: HTMLElement;
   scoreboard: HTMLElement;
