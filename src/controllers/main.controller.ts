@@ -5,7 +5,6 @@ import { CANVAS_SIZE, SPRITE_URLS } from '../constants/game-config.constants';
 import { GameService } from '../services/game.service';
 import { Player } from '../models/player.model';
 
-declare var Bump: any;
 interface GUI {
   canvasContainer: HTMLElement;
   scoreboard: HTMLElement;
