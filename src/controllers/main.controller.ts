@@ -124,7 +124,8 @@ export class MainController {
   }
 
   private renderObstacles() {
-    // TODO 2 (hint: call createPipeSet and deleteOldPipes every createObstacle interval)
+    // TODO 2 (hint: call createPipeSet and deleteOldPipes)
+    this.gameService.createObstacle$.pipe().subscribe();
   }
 
   private createPipeSet(): void {
@@ -134,6 +135,7 @@ export class MainController {
     for (const pipe of [bottomPipe, topPipe]) {
       this.app.stage.addChild(pipe.sprite);
       // TODO 3 (hint: update the pipe position every frame update)
+      this.gameService.onFrameUpdate$.pipe().subscribe();
     }
   }
 
