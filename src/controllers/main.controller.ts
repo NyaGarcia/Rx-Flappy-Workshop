@@ -7,7 +7,6 @@ import { GameService } from '../services/game.service';
 import { Player } from '../models/player.model';
 import { Skyline } from '../models/skyline.model';
 
-declare var Bump: any;
 interface GUI {
   canvasContainer: HTMLElement;
   scoreboard: HTMLElement;
