@@ -174,14 +174,14 @@ export class MainController {
   }
 
   private checkCollisions(): void {
-    const { children }: { children: any[] } = this.app.stage;
+    const { children } = this.app.stage;
 
     if (this.hasCollided(children)) {
       this.gameOver();
     }
   }
 
-  private hasCollided(children: any[]) {
+  private hasCollided(children: PIXI.DisplayObject[]) {
     return children
       .filter(({ type }) => type === 'pipe')
       .some(pipe => this.bump.hit(this.player.sprite, pipe));
